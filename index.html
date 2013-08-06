@@ -31,10 +31,78 @@
           <h2>
 <a name="welcome-to-my-github-page" class="anchor" href="#welcome-to-my-github-page"><span class="octicon octicon-link"></span></a>Welcome to my github page.</h2>
 
-<p>My name is <a href="https://github.com/code-flow" class="user-mention">@code-flow</a> and I'm currently doing a lot with WordPress but I'm also interested in doing all sort of programming.</p>
+<p>My name is <a href="https://github.com/code-flow" class="user-mention">@code-flow</a> and I'm currently doing a lot with WordPress but I'm also interested in doing all sort of programming. If you want to learn more about me, check out <a href="http://florian-simeth.de/en/">my personal website</a>. If you want to contribute to my private projects, please feel free to do so.</p>
+
+<h2>
+<a name="wind-pi-a-raspberry-pi-wind-anemometer-with-the-use-of-a-cpu-fan" class="anchor" href="#wind-pi-a-raspberry-pi-wind-anemometer-with-the-use-of-a-cpu-fan"><span class="octicon octicon-link"></span></a>Wind-Pi (a Raspberry Pi wind anemometer with the use of a cpu fan)</h2>
+
+<p>A while ago I was searching for a cheap, affordable wind anemometer that can log data to a SD-card or anything else so that I can use that data to create a graph and for a other calculations.
+But the problem was that all the anemometers with data-loggin functionalities are damn expansive and I didn't want to spend any money for that. So I decided to built my own with a <a href="http://www.raspberrypi.org/">Raspberry Pi</a>.</p>
 
 <h3>
-<a name="contact" class="anchor" href="#contact"><span class="octicon octicon-link"></span></a>Contact</h3>
+<a name="notes" class="anchor" href="#notes"><span class="octicon octicon-link"></span></a>Notes:</h3>
+
+<p>Please feel free to use this code and the instructions to build your own Raspberry-Pi-Anemometer. But please note that there is no warranty for this free software (read the license for more information). </p>
+
+<h3>
+<a name="challenges" class="anchor" href="#challenges"><span class="octicon octicon-link"></span></a>Challenges:</h3>
+
+<ul>
+<li>Cheap components</li>
+<li>Data-Logging</li>
+<li>Nice graph</li>
+<li>Maybe a live-view</li>
+</ul><h3>
+<a name="what-do-i-need" class="anchor" href="#what-do-i-need"><span class="octicon octicon-link"></span></a>What do I need?</h3>
+
+<ul>
+<li>A CPU-Fan with a least three wires (see below why you need three wires)</li>
+<li>A cheap anemometer to compare the cpu-fan-anemometer with the right wind speed (maybe something like this <a href="Wind%20Anemometer%20@%20reichelt.de">http://www.reichelt.de/Windmesser-Anemometer/ANEMO-3000/3/index.html?;ACTION=3;LA=2;ARTICLE=84973;GROUPID=4030;artnr=ANEMO+3000</a>
+</li>
+<li>Some (long and isolated) wires</li>
+<li>a soldering iron and some fine solder</li>
+</ul><h3>
+<a name="why-do-i-need-a-cpu-fan-with-three-wires" class="anchor" href="#why-do-i-need-a-cpu-fan-with-three-wires"><span class="octicon octicon-link"></span></a>Why do I need a CPU-Fan with three wires?</h3>
+
+<p>This is because we actually want to measure the speed. And the CPU-Fans with a least three wires have a built-in <a href="http://en.wikipedia.org/wiki/Hall_effect_sensor">Hall-Sensor</a> which is there to work like a "tacho". So it returns something like the "speed" when it returns two pulses per one revolution of the fan. You can read more on the detailed functionality of a CPU-Fan here: <a href="http://en.wikipedia.org/wiki/Hall_effect_sensor">How PC Fans Work</a></p>
+
+<h3>
+<a name="how-does-it-work" class="anchor" href="#how-does-it-work"><span class="octicon octicon-link"></span></a>How does it work?</h3>
+
+<ol>
+<li>You have to open your CPU-Fan and remove the stator (or the magnets, if you will). Check out this page to learn <a href="http://www.instructables.com/id/How-to-take-apart-a-case-fan/">how to open the CPU-Fan</a>. Check this image to see what the stator is: <a href="http://pcbheaven.com/scripts/imagepresent.php?filename=%2Fwikipages%2Fimages%2Fhowpcfanswork_1269849438.jpg">The stator of a CPU fan (image)</a>
+</li>
+<li>Then put the fan together again (without the stator). You will feel that the blades will now rotate more easy. This is because of the removed stator which was actually there to use the the whole thing as a little motor. Now it's just <em>generating pulses in the wind</em> :-)</li>
+<li>Depending on the color of the wires that come out of the fan you have to connect them with the GPIOs of the Raspberry Pi. <a href="http://pcbheaven.com/wikipages/How_PC_Fans_Work/">According to this website</a> you can have either a plug with black/red/yellow wires or a plug with red/yellow/green wires. In fact you have a positive power supply, a negative power supply and a wire that sends back the pulses.</li>
+<li>The positive wire gets connected with GPIO Pin 1 (which is 3,3V) but you can also connect it with Pin 2 (which is 5V) when your wires a pretty long (I have my self-made-anemometer on the roof of my house, so 2 volts get lost just because of the length of the wires).</li>
+<li>The negative wire gets connected with GPIO Pin 6 (which is GND/Ground).</li>
+<li>And the "tacho"-wire will be connected with GPIO pin 3 (which is SDA).</li>
+<li>That's it! Now let's start to code.</li>
+</ol><h3>
+<a name="how-does-the-code-look-like" class="anchor" href="#how-does-the-code-look-like"><span class="octicon octicon-link"></span></a>How does the code look like?</h3>
+
+<p>This was the most difficult part for me because I'm not really familiar with hardware-oriented programming. PHP is where I'm more "at home".</p>
+
+<ol>
+<li>First I've installed <a href="http://wiringpi.com/">Wiring PI</a> which is a project by Gordon for an easy access to the GPIO pins.</li>
+<li>I've also installed an apache webserver with PHP and MySQL which we need later. (I hope you're familiar with installing those things on a linux-driven computer. If not, just ask Google. There are a hell of a lot guides out there which are pretty awesome.)</li>
+<li>You may also need so install a c-compiler as well as some modules you might need when compiling the program (like MySQL).</li>
+<li>You can find the windpi.c script on Github.</li>
+</ol><p>Compiling the anemometer-script:</p>
+
+<p><code>gcc -c -I/usr/include/mysql/ windpi.c</code></p>
+
+<p>Then another compilation with the following line (activates mysql):
+<code>gcc -Wall -o windpi windpi.o -L/usr/local/lib -lwiringPi -lm -L/usr/lib/mysql -lmysqlclient</code></p>
+
+<p>You can start the windfan with my windpi.sh script which you can also find in the github repository.</p>
+
+<p>That's it. The raspberry will now collect the wind-speed from your roof :-)</p>
+
+<p>In a later post I will show you how to create a nice-looking graph out of the data the script collects.</p>
+
+<h2>
+<a name="contact" class="anchor" href="#contact"><span class="octicon octicon-link"></span></a>Contact</h2>
 
 <p>Please check out my <a href="http://florian-simeth.de/impressum/">Imprint page</a></p>
         </section>
